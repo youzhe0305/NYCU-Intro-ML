@@ -1,0 +1,6 @@
+*.zip
+*.csv
+*.doc
+*.docx
+__pycache__
+.pytest_cache
