@@ -122,7 +122,7 @@ class FLD:
         self.m1 = np.mean(X1, axis=0)  # mean according batch
         self.m0 = np.mean(X0, axis=0)
 
-        self.sb = (self.m1 - self.m0) @ (self.m1 - self.m0)
+        self.sb = (self.m1 - self.m0).reshape(-1, 1) @ (self.m1 - self.m0).reshape(-1, 1).T
         self.sw = (X1 - self.m1).T @ (X1 - self.m1) + (X0 - self.m0).T @ (X0 - self.m0)
 
         self.w = np.linalg.inv(self.sw) @ (self.m1 - self.m0)
@@ -170,6 +170,7 @@ class FLD:
             plt.plot([X0[i, 0], proj_x0[i]], [X0[i, 1], proj_y0[i]], color='lightblue', alpha=0.5)
 
         plt.savefig(f'{name}.png')
+        plt.clf()
 
 
 def compute_auc(y_trues, y_preds):
