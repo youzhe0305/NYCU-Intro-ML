@@ -4,7 +4,8 @@ import random
 
 import torch
 from src import AdaBoostClassifier, BaggingClassifier, DecisionTree
-from src.utils import preprocess, preprocess_y, plot_learners_roc
+from src.utils import preprocess, preprocess_y, plot_learners_roc, plot_feature_importance
+from src.decision_tree import gini
 
 
 def main():
@@ -33,12 +34,12 @@ def main():
     y_train = preprocess_y(y_train)
     X_test = preprocess(X_test)
     y_test = preprocess_y(y_test)
-    
     """
     (TODO): Implement your ensemble methods.
     1. You can modify the hyperparameters as you need.
     2. You must print out logs (e.g., accuracy) with loguru.
     """
+
     # AdaBoost
     clf_adaboost = AdaBoostClassifier(
         input_dim=X_train.shape[1],
@@ -46,8 +47,8 @@ def main():
     _ = clf_adaboost.fit(
         X_train,
         y_train,
-        num_epochs=500,
-        learning_rate=1e-3,
+        num_epochs=2500,
+        learning_rate=5e-2,
     )
     y_pred_classes, y_pred_probs = clf_adaboost.predict_learners(X_test)
     accuracy_ = torch.sum(torch.eq(y_pred_classes, y_test)) / y_test.shape[0]
@@ -55,10 +56,11 @@ def main():
     plot_learners_roc(
         y_preds=y_pred_probs,
         y_trues=y_test,
-        fpath=...,
+        fpath='./Adaboost_roc.png',
     )
-    feature_importance = clf_adaboost.compute_feature_importance()
+    feature_importance, feature_name = clf_adaboost.compute_feature_importance(train_df)
     # (TODO) Draw the feature importance
+    plot_feature_importance(feature_importance, feature_name, './Adaboost_feature_importance')
 
     # Bagging
     clf_bagging = BaggingClassifier(
@@ -67,28 +69,38 @@ def main():
     _ = clf_bagging.fit(
         X_train,
         y_train,
-        num_epochs=...,
-        learning_rate=...,
+        num_epochs=3000,
+        learning_rate=1e-3,
     )
     y_pred_classes, y_pred_probs = clf_bagging.predict_learners(X_test)
-    accuracy_ = ...
+    accuracy_ = torch.sum(torch.eq(y_pred_classes, y_test)) / y_test.shape[0]
     logger.info(f'Bagging - Accuracy: {accuracy_:.4f}')
     plot_learners_roc(
         y_preds=y_pred_probs,
         y_trues=y_test,
-        fpath=...,
+        fpath='Bagging_roc.png',
     )
-    feature_importance = clf_bagging.compute_feature_importance()
+    feature_importance, feature_name = clf_bagging.compute_feature_importance()
     # (TODO) Draw the feature importance
+    plot_feature_importance(feature_importance, feature_name, './Bagging_feature_importance')
+
+    # Gini
+    sample = torch.tensor([0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1])
+    sample_gini = gini(sample)
+    logger.info(f'Sample gini: {sample_gini:.4f}')
 
     # Decision Tree
     clf_tree = DecisionTree(
-        max_depth=...,
+        max_depth=7,
     )
     clf_tree.fit(X_train, y_train)
     y_pred_classes = clf_tree.predict(X_test)
-    accuracy_ = ...
+    accuracy_ = torch.sum(torch.eq(y_pred_classes, y_test)) / y_test.shape[0]
     logger.info(f'DecisionTree - Accuracy: {accuracy_:.4f}')
+
+    feature_importance, feature_name = clf_tree.get_feature_importance()
+    # (TODO) Draw the feature importance
+    plot_feature_importance(feature_importance, feature_name, './Decision_Tree_feature_importance')
 
 
 if __name__ == '__main__':
