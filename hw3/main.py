@@ -5,7 +5,7 @@ import random
 import torch
 from src import AdaBoostClassifier, BaggingClassifier, DecisionTree
 from src.utils import preprocess, preprocess_y, plot_learners_roc, plot_feature_importance
-from src.decision_tree import gini
+from src.decision_tree import gini, entropy
 
 
 def main():
@@ -87,7 +87,9 @@ def main():
     # Gini
     sample = torch.tensor([0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1])
     sample_gini = gini(sample)
+    sample_entropy = entropy(sample)
     logger.info(f'Sample gini: {sample_gini:.4f}')
+    logger.info(f'Sample entropy: {sample_entropy:.4f}')
 
     # Decision Tree
     clf_tree = DecisionTree(
