@@ -1,0 +1,6 @@
+[submodule "hw4/hw4/EmoNeXt"]
+	path = hw4/hw4/EmoNeXt
+	url = https://github.com/youzhe0305/EmoNeXt
+[submodule "hw4/EmoNeXt"]
+	path = hw4/EmoNeXt
+	url = https://github.com/youzhe0305/EmoNeXt
